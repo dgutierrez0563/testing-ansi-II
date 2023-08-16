@@ -1,0 +1,45 @@
+---
+- name: Execute the command in remote shell
+  hosts: serversvme
+  gather_facts: yes
+  tasks:
+    
+      #"sudo sync && sudo sysctl -w vm.drop_caches=3 && sync ; echo 3 > /proc/sys/vm/drop_caches"
+
+  # - name: Check system information
+  #   shell: 
+  #     "free -h ; sudo sync && sudo sysctl -w vm.drop_caches=3 && sync ; echo 3 > /proc/sys/vm/drop_caches"
+  #   register: os_info
+
+  - name: "Exec items for Clean Ram in servers"
+    shell: "{{ item }}"
+    register: os_info
+    with_items:
+      #- echo "hello"
+      - echo "free -h ; sudo sync && sudo sysctl -w vm.drop_caches=3 && sync ; echo 3 > /proc/sys/vm/drop_caches"
+    failed_when: "'error' in os_info.stderr"
+
+    # no_log: false
+    # debug:
+    # var: item
+    
+  #- name: display result
+  # - debug:
+  #     #msg: "{{os_info.stdout_lines}}"
+  #     msg: "{{os_info}}"
+
+  - debug:
+      msg: "{{ item.stderr }}"
+    loop: "{{ os_info.results }}"
+
+  - name: fail if error in command output
+    fail:
+      msg: "Not a valid command. Make sure the data model"
+
+    when: "'Error' in  item.stderr "
+    loop: "{{ os_info.results }}"
+    
+      #how to run
+      #ansible-playbook updatedateexpire_user.yml
+      #ansible-playbook --syntax-check myplaybook.yml 
+      #ansible-playbook --check myplaybook.yml 
