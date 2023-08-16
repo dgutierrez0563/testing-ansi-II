@@ -1,6 +1,6 @@
 ---
 - name: Execute the command in remote shell
-  hosts: serversvme
+  hosts: all
   gather_facts: yes
   tasks:
     
