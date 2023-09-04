@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: False
+  tasks:
+  - name: run uptime
+    shell: uptime
+    register: uptime
+    
+  - name: show uptime
+    debug: var=uptime
+
+  # - name: Hardware info
+  #   vars:
+  #     msg: |
+  #     RAM: {{ ansible_memtotal_mb }}
+  #     SWAP: {{ ansible_memory_mb.swap.total }}
+  #   debug:
+  #     msg: "{{ msg.split('\n') }}"
