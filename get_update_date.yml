@@ -1,0 +1,27 @@
+---
+- name: UPDATE Dates in hosts
+  hosts: all
+  gather_facts: yes
+  
+  tasks:
+  - name: GET Date Before
+    shell: date
+    register: result_date_before
+
+  - name: UPDATE Date --force
+    shell: ntpdate cr.pool.ntp.org
+    register: resulte_process
+
+  - name: GET Date After
+    shell: date
+    register: result_date_after
+
+  - name: Date Information Stats
+    debug:
+      msg: 
+        - "Executed On: {{ ansible_date_time.date }} {{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}"
+        - "Get Date Before: {{ result_date_before.stdout }}"
+        - "Process: {{ resulte_process.stdout }}"
+        - "Get Date After: {{ result_date_after.stdout }}"
+
+#ansible-playbook -i ../hosts/it_host.yaml deploy_docker_discount.yml -K
