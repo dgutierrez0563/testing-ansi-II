@@ -2,6 +2,7 @@
 - name: UPDATE Dates in hosts
   hosts: all
   gather_facts: false
+  become: true
   
   tasks:
   - name: GET Date Before
