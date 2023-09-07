@@ -9,7 +9,7 @@
     register: result_date_before
 
   - name: UPDATE Date --force
-    shell: ntpdate cr.pool.ntp.org
+    shell: apt update
     register: resulte_process
 
   - name: GET Date After
