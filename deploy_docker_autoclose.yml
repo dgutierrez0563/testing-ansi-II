@@ -168,7 +168,7 @@
         - "Docker UP: {{ images_up }}"
 
     - name: Delete images stack remotely
-      shell: docker images -a | grep "{{microservice_name}}" | grep "{{ item }}" | awk '{ print $3; }' | xargs docker rmi
+      shell: docker images -a | grep "{{images_name}}" | grep "{{ item }}" | awk '{ print $3; }' | xargs docker rmi
       register: images_deleted_info
 
       loop:
