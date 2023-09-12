@@ -35,19 +35,19 @@
         msg: 
         - "Local Path - Later: {{ msg_print_local_path }}"
 
-    - name: Get infos on container Discount
-      docker_container_info:
-        name: "{{microservice_name}}"
-      register: result_container
+    #- name: Get infos on container Discount
+    #  docker_container_info:
+    #    name: "{{microservice_name}}"
+    #  register: result_container
 
-    - name: Does container exist?
-      debug:
-        msg: "The container {{ 'exists' if result_container.exists else 'does not exist' }}"
+    #- name: Does container exist?
+    #  debug:
+    #    msg: "The container {{ 'exists' if result_container.exists else 'does not exist' }}"
 
-    - name: Print information about container
-      debug:
-        var: result_container.container
-      when: result_container.exists
+    #- name: Print information about container
+    #  debug:
+    #    var: result_container.container
+    #  when: result_container.exists
 
 
     # - name: Ver images de docker service
