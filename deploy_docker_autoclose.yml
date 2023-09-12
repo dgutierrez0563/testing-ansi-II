@@ -70,8 +70,8 @@
     #     - "Inspect MS: {{ result_image }}"
 
     - name: View all images
-      #shell: imagesdockers=docker images | grep "{{microservice_name}}" | awk '{print $3}'
-      shell: docker images | grep "{{microservice_name}}" | awk '{print $3}'
+      #shell: imagesdockers=docker images | grep "{{images_name}}" | awk '{print $2}'
+      shell: docker images | grep "{{images_name}}" | awk '{print $2}'
       register: allimagesdockers
 
     - name: Print All Images
@@ -80,19 +80,19 @@
         - "View Images: {{ allimagesdockers.stdout_lines }}"
 
 
-    #   #Valid docker up
-    # - name: Make sure compose service is up
-    #   docker_compose:
-    #     project_src: "{{ docker_compose_path }}"
-    #     files:
-    #       - "{{ moduledocker }}-compose.yml"
-    #     state: present
-    #     register: docker_ms_status
+       #Valid docker up
+     - name: Make sure compose service is up
+       docker_compose:
+         project_src: "{{ docker_compose_path }}"
+         files:
+           - "{{ moduledocker }}-compose.yml"
+         state: present
+         register: docker_ms_status
 
-    # - name: Print MS docker status 
-    #   debug:
-    #     msg: 
-    #     - "Docker Status: {{ docker_ms_status }}"
+     - name: Print MS docker status 
+       debug:
+         msg: 
+         - "Docker Status: {{ docker_ms_status }}"
 
     - name: Ansible replace string example
       replace:
