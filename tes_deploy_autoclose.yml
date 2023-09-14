@@ -62,10 +62,11 @@
         - "View Images: {{ allimagesdockers.stdout_lines }}"
 
     - name: Ansible replace string version
-      replace:
+      ansible.builtin.replace:
+      #replace:
         path: "{{autoclose_deploy_path}}"
         regexp: '{{images_name}}:{{ docker_old_ver }}'
-        replace: "{{images_name}}:{{docker_new_ver}}"
+        replace: '{{images_name}}:{{docker_new_ver}}'
       register: set_version
 
     - name: Print version seteada
