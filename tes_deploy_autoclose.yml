@@ -64,7 +64,7 @@
     - name: Ansible replace string version
       ansible.builtin.replace:
       #replace:
-        path: "{{autoclose_deploy_path}}"
+        path: /usr/local/share/etc-parking/microservice_autoclose/docker-compose.yml
         regexp: '{{images_name}}:{{ docker_old_ver }}'
         replace: '{{images_name}}:{{docker_new_ver}}'
       register: set_version
