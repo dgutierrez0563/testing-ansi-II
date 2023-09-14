@@ -13,6 +13,7 @@
     docker_new_ver: 3.0.6
     force_recreation: false
     directory_deploy_path: /usr/local/share/etc-parking/microservice_autoclose
+    autoclose_deploy_path: /usr/local/share/etc-parking/microservice_autoclose/docker-compose.yml
     microservice_name: parking_autoclose
     images_name: libautoclose
     moduledocker: docker
@@ -60,11 +61,17 @@
         msg: 
         - "View Images: {{ allimagesdockers.stdout_lines }}"
 
-    - name: Ansible replace string example
+    - name: Ansible replace string version
       replace:
-        path: "{{directory_deploy_path}}/{{docker_yml}}"
+        path: "{{autoclose_deploy_path}}"
         regexp: '{{images_name}}:{{ docker_old_ver }}'
         replace: "{{images_name}}:{{docker_new_ver}}"
+      register: set_version
+
+    - name: Print version seteada
+      debug:
+        msg: 
+        - "View version seteada: {{ set_version.stdout_lines }}"
 
     - name: Remove Loggins Before
       shell: 'docker logout registry.gitlab.com'
