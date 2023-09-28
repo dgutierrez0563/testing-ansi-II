@@ -1,7 +1,8 @@
 ---
 - hosts: all
   gather_facts: False
-  become: true
+  become: yes
+#  user: isadmin
   #ansible-playbook -i ../hosts/it_host.yaml deploy_docker_discount.yml -K
   vars:
     remote_remove_only: false
@@ -16,8 +17,7 @@
     autoclose_deploy_path: /usr/local/share/etc-parking/microservice_autoclose/docker-compose.yml
     microservice_name: parking_autoclose
     images_name: libautoclose
-    moduledocker: docker
-    commands_bash: docker-compose 
+    commands_bash: docker-compose
     docker_yml: docker-compose.yml
 
   tasks:
@@ -32,10 +32,10 @@
       set_fact: local_docker_compose='{{ directory_deploy_path }}'
       register: msg_print_local_path
 
-    - name: Print Files
-      debug:
-        msg: 
-        - "Local Path - Later: {{ msg_print_local_path }}"
+#    - name: Print Files
+#      debug:
+#        msg:
+#        - "Local Path - Later: {{ msg_print_local_path }}"
 
     - name: Get infos on container Discount
       docker_container_info:
@@ -46,33 +46,39 @@
       debug:
         msg: "The container {{ 'exists' if result_container.exists else 'does not exist' }}"
 
-    - name: Print information about container
-      debug:
-        var: result_container.container
-      when: result_container.exists
+ #   - name: Print information about container
+ #     debug:
+ #       var: result_container.container
+ #     when: result_container.exists
+
 
     - name: View all images
-      #shell: imagesdockers=docker images | grep "{{images_name}}" | awk '{print $2}'
-      shell: docker images | grep "{{images_name}}" | awk '{print $2}'
+      #shell: imagesdockers=docker images | grep "{{microservice_name}}" | awk '{print $3}'
+      shell: docker images | grep "{{images_name}}" | awk '{print $3}'
       register: allimagesdockers
 
     - name: Print All Images
       debug:
-        msg: 
+        msg:
         - "View Images: {{ allimagesdockers.stdout_lines }}"
 
-    - name: Ansible replace string version
-      ansible.builtin.replace:
-      #replace:
-        path: /usr/local/share/etc-parking/microservice_autoclose/docker-compose.yml
-        regexp: '{{images_name}}:{{ docker_old_ver }}'
-        replace: '{{images_name}}:{{docker_new_ver}}'
-      register: set_version
+    #   #Valid docker up
+    # - name: Make sure compose service is up
+    #   docker_compose:
+    #     project_src: "{{ docker_compose_path }}"
+    #     files:
+    #       - "{{ moduledocker }}-compose.yml"
+    #     state: present
+    #     register: docker_ms_status
 
-    - name: Print version seteada
-      debug:
-        msg: 
-        - "View version seteada: {{ set_version.stdout_lines }}"
+    # - name: Print MS docker status
+    #   debug:
+    #     msg:
+    #     - "Docker Status: {{ docker_ms_status }}"
+    - name: Change shell sed -i
+ #     become: yes
+      shell: "sudo sed -i 's/{{images_name}}:[0-9].[0-9].[0-9]/{{images_name}}:{{docker_new_ver}}/g' {{autoclose_deploy_path}}"
+      ignore_errors: true
 
     - name: Remove Loggins Before
       shell: 'docker logout registry.gitlab.com'
@@ -80,7 +86,7 @@
 
     - name: Print Logout before
       debug:
-        msg: 
+        msg:
         - "Logout Gitlab: {{ logout_gitlab }}"
 
     - name: Delete remote docker stack
@@ -96,7 +102,7 @@
 
     - name: Print Login
       debug:
-        msg: 
+        msg:
         - "Login Gitlab: {{ response_login_gitlab }}"
 
     - name: Pull images from docker-compose remotely
@@ -108,7 +114,7 @@
 
     - name: Pull Gitlab
       debug:
-        msg: 
+        msg:
         - "Pull Gitlab: {{ pull_gitlab }}"
 
     - name: Docker down stack remotely
@@ -125,14 +131,15 @@
 
     - name: Start docker-compose up stack remotely
       shell: '{{commands_bash}} -f {{docker_yml}} up -d'
-      args: 
+      args:
         chdir: '{{ directory_deploy_path }}'
       when: not remote_remove_only
       register: images_up
 
+[2023-09-28T16:14:53,030] INFO  web.requests "GET /menu/homeAjax" 192.168.240.254 https mgutierrez form 8 ? [application/json;charset=utf-8] (Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36)
     - name: Docker UP remotely
       debug:
-        msg: 
+        msg:
         - "Docker UP: {{ images_up }}"
 
     - name: Delete images stack remotely
@@ -154,5 +161,16 @@
 
       when: "'Error' in  item.stderr "
       loop: "{{ images_deleted_info.results }}"
+
+
+    # - name: Test if fixture is running
+    #   uri:
+    #     url: http://{{ ansible_hostname }}:8080
+    #   register: http_response
+
+    # - name: Fail, if fixture is not running
+    #   fail:
+    #     msg: "Fixture is not running..."
+    #   when: http_response.status != 200
 
 #    image: registry.gitlab.com/etc3/etc-parking/parking_discounts/parking_discounts:2.7.6
