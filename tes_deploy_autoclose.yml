@@ -136,7 +136,6 @@
       when: not remote_remove_only
       register: images_up
 
-[2023-09-28T16:14:53,030] INFO  web.requests "GET /menu/homeAjax" 192.168.240.254 https mgutierrez form 8 ? [application/json;charset=utf-8] (Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36)
     - name: Docker UP remotely
       debug:
         msg:
