@@ -88,7 +88,7 @@
     commands_bash: docker-compose 
     file_docker_yml: docker-compose.yml
 
-  task:
+  tasks:
     - name: Set fact directory for local YML AUTOCLOSE
       set_fact: local_docker_compose='{{ autoclose_deploy_path }}'
       register: msg_print_local_path
