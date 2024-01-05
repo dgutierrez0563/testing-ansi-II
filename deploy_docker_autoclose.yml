@@ -89,38 +89,24 @@
     file_docker_yml: docker-compose.yml
 
   tasks:
-    - name: Set fact directory for local YML AUTOCLOSE
-      set_fact: local_docker_compose='{{ autoclose_deploy_path }}'
-      register: msg_print_local_path
-    
-    - name: Print Files fact
-      debug:
-        msg: 
-        - "Local Path - Later: {{ msg_print_local_path }}"
-    
-    - name: Get info on container in factory - AUTOCLOSE
-      docker_container_info:
-        name: "{{container_autoclose}}"
-      register: result_container
-      ignore_errors: yes
     
     ############################
     
-    - name: Change by shell ---> replace versions
+    - name: "Change by shell ---> replace versions"
       shell: "sudo sed -i 's/{{images_name_autoclose}}:[0-9].[0-9].[0-9]/{{images_name_autoclose}}:{{new_ver_autoclose}}/g' {{autoclose_deploy_path}}/{{file_docker_yml}}"
       ignore_errors: yes
     
-    - name: Remove Loggins Before
+    - name: "Remove Loggins Before"
       shell: 'docker logout registry.gitlab.com'
       register: logout_gitlab
       ignore_errors: yes
     
-    - name: Print Logout before
+    - name: "Print Logout before"
       debug:
         msg: 
         - "Logout Gitlab: {{ logout_gitlab }}"
     
-    - name: Login in to remote docker registry
+    - name: "Login in to remote docker registry"
       shell: docker login -p {{ etcparking_login_pass }} -u {{ etcparking_login_user }} {{ etcparking_login_registry }}
       when: etcparking_login_pass is defined and etcparking_login_user is defined #and not remote_remove_only
       register: response_login_gitlab
@@ -132,19 +118,19 @@
         - "Login Gitlab: {{ response_login_gitlab }}"
     
     
-    - name: Docker down AUTOCLOSE stack remotely
+    - name: "Docker down AUTOCLOSE stack remotely"
       shell: docker-compose -f docker-compose.yml down
       args:
         chdir: /usr/local/share/etc-parking/microservice_autoclose
       ignore_errors: yes
     
-    - name: Docker up AUTOCLOSE stack remotely
+    - name: "Docker up AUTOCLOSE stack remotely"
       shell: docker-compose -f docker-compose.yml up -d
       args:
         chdir: /usr/local/share/etc-parking/microservice_autoclose
       ignore_errors: yes
     
-    - name: Remove Loggins Afters
+    - name: "Remove Loggins Afters"
       shell: 'docker logout registry.gitlab.com'
       register: logout_gitlab
       ignore_errors: yes
