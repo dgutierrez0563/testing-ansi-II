@@ -1,0 +1,151 @@
+---
+- hosts: all
+#- hosts: PAN_PRODUCTION_host
+  gather_facts: yes
+  become: true
+  vars:
+    remote_remove_only: false
+    remote_remove_args: '--rmi all --remove-orphans'
+    etcparking_login_registry: 'registry.gitlab.com'
+    etcparking_login_user: 'dgutierrez'
+    etcparking_login_pass: 'f2k_bYARRVGe2doynDpc'
+    force_recreation: false
+
+    new_ver_autoclose: 3.0.5
+    new_ver_discount: 2.7.7
+    new_ver_rates: 3.0.11
+    new_ver_security: 3.0.7
+    new_ver_params: 3.0.2
+    new_ver_controversies: 3.1.8
+    new_ver_remittance: 3.0.3
+    new_ver_reports: 3.0.4
+    new_ver_transits: 3.1.1
+    new_ver_schedule: 3.0.1
+    new_ver_subscribers: 3.1.1
+    new_ver_dashboard: 1.0.1
+    new_ver_frontlist: 2.0.2
+    new_ver_wsparking: 3.0.1
+    new_ver_tagmanagement: 1.1.0
+    new_ver_notification: 3.2.0
+
+    autoclose_deploy_path:     /usr/local/share/etc-parking/microservice_autoclose
+    discount_deploy_path:      /usr/local/share/etc-parking/microservice_discount
+    rates_deploy_path:         /usr/local/share/etc-parking/microservice_rate
+    security_deploy_path:      /usr/local/share/etc-parking/microservice_security
+    params_deploy_path:        /usr/local/share/etc-parking/microservice_param
+    controversies_deploy_path: /usr/local/share/etc-parking/microservice_controversies
+    remittance_deploy_path:    /usr/local/share/etc-parking/microservice_remittance
+    reports_deploy_path:       /usr/local/share/etc-parking/microservice_reports
+    transits_deploy_path:      /usr/local/share/etc-parking/microservice_transits
+    schedule_deploy_path:      /usr/local/share/etc-parking/microservice_controversies
+    dashboard_deploy_path:     /usr/local/share/etc-parking/microservice_remittance
+    #frontlist_deploy_path:     /usr/local/share/etc-parking/
+    subscribers_deploy_path:   /usr/local/share/etc-parking/microservice_subscribers
+    #subscribers_deploy_path:   /usr/local/share/etc-parking/microservice_subscribers
+    notification_deploy_path:  /usr/local/share/etc-parking/microservice_notification
+    wsparking_deploy_path:     /usr/local/share/etc-parking/microservice_wsparking
+    tagmanagement_deploy_path: /usr/local/share/etc-parking/microservice_ws_tag_management
+
+    #directory_deploy_path: /usr/local/share/etc-parking/microservice_autoclose
+    #discount_deploy_path: /usr/local/share/etc-parking/microservice_discount
+    #autoclose_deploy_path: /usr/local/share/etc-parking/microservice_autoclose/docker-compose.yml
+
+    images_name_autoclose:     libautoclose
+    images_name_discount:      parking_discounts
+    images_name_rates:         parking_rates
+    images_name_security:      parking_security
+    images_name_params:        parking_params
+    images_name_controversies: parking_controversies
+    images_name_remittance:    parking_remittance
+    images_name_reports:       parking_reports
+    images_name_transits:      parking_transits
+    images_name_schedule:      parking_schedule
+    images_name_subscribers:   parking_subscribers
+    images_name_dashboard:     parking_dashboard
+    images_name_frontlist:     parking-list-front
+    images_name_wsparking:     ws_parking_ms
+    images_name_tagmanagement: ws_tag_management
+    images_name_notification:  parking_notification
+
+    container_autoclose:     parking_autoclose
+    container_discount:      parking_discount
+    container_rates:         parking_rates
+    container_security:      parking_security
+    container_params:        parking_params
+    container_controversies: parking_controversies
+    container_remittance:    parking_remittance
+    container_reports:       parking_reports
+    container_transits:      parking_transits
+    container_schedule:      parking_schedule
+    container_subscribers:   parking_subscribers
+    container_dashboard:     parking_dashboard
+    container_frontlist:     parking_front_list
+    container_wsparking:     ws_parking_ms
+    container_tagmanagement: ws_tag_management
+    container_notification:  parking_notification
+
+    moduledocker: docker
+    commands_bash: docker-compose 
+    file_docker_yml: docker-compose.yml
+
+task:
+  - name: Set fact directory for local YML AUTOCLOSE
+    set_fact: local_docker_compose='{{ autoclose_deploy_path }}'
+    register: msg_print_local_path
+  
+  - name: Print Files fact
+    debug:
+      msg: 
+      - "Local Path - Later: {{ msg_print_local_path }}"
+  
+  - name: Get info on container in factory - AUTOCLOSE
+    docker_container_info:
+      name: "{{container_autoclose}}"
+    register: result_container
+    ignore_errors: yes
+  
+  ############################
+  
+  - name: Change by shell ---> replace versions
+    shell: "sudo sed -i 's/{{images_name_autoclose}}:[0-9].[0-9].[0-9]/{{images_name_autoclose}}:{{new_ver_autoclose}}/g' {{autoclose_deploy_path}}/{{file_docker_yml}}"
+    ignore_errors: yes
+  
+  - name: Remove Loggins Before
+    shell: 'docker logout registry.gitlab.com'
+    register: logout_gitlab
+    ignore_errors: yes
+  
+  - name: Print Logout before
+    debug:
+      msg: 
+      - "Logout Gitlab: {{ logout_gitlab }}"
+  
+  - name: Login in to remote docker registry
+    shell: docker login -p {{ etcparking_login_pass }} -u {{ etcparking_login_user }} {{ etcparking_login_registry }}
+    when: etcparking_login_pass is defined and etcparking_login_user is defined #and not remote_remove_only
+    register: response_login_gitlab
+    ignore_errors: yes
+  
+  - name: Print Login
+    debug:
+      msg: 
+      - "Login Gitlab: {{ response_login_gitlab }}"
+  
+  
+  - name: Docker down AUTOCLOSE stack remotely
+    shell: docker-compose -f docker-compose.yml down
+    args:
+      chdir: /usr/local/share/etc-parking/microservice_autoclose
+    ignore_errors: yes
+  
+  - name: Docker up AUTOCLOSE stack remotely
+    shell: docker-compose -f docker-compose.yml up -d
+    args:
+      chdir: /usr/local/share/etc-parking/microservice_autoclose
+    ignore_errors: yes
+  
+  - name: Remove Loggins Afters
+    shell: 'docker logout registry.gitlab.com'
+    register: logout_gitlab
+    ignore_errors: yes
+
