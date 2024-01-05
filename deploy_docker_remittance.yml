@@ -1,0 +1,49 @@
+---
+- hosts: all
+#- hosts: PAN_PRODUCTION_host
+  gather_facts: yes
+  become: true
+
+
+  tasks:
+    - name: Change by shell ---> replace versions
+      shell: "sudo sed -i 's/registry.gitlab.com\/etc3\/etc-parking\/parking_remittances\/parking_remittance:.*/registry.gitlab.com\/etc3\/etc-parking\/parking_remittances\/parking_remittance:{{new_ver_remittance}}/g' /usr/local/share/etc-parking/microservice_remittance/docker-compose.yml"
+      ignore_errors: yes
+
+    - name: Remove Loggins Before
+      shell: 'docker logout registry.gitlab.com'
+      register: logout_gitlab
+      ignore_errors: yes
+    
+    - name: Print Logout before
+      debug:
+        msg: 
+        - "Logout Gitlab: {{ logout_gitlab }}"
+    
+    - name: Login in to remote docker registry
+      shell: docker login -p {{ etcparking_login_pass }} -u {{ etcparking_login_user }} {{ etcparking_login_registry }}
+      when: etcparking_login_pass is defined and etcparking_login_user is defined #and not remote_remove_only
+      register: response_login_gitlab
+      ignore_errors: yes
+    
+    - name: Print Login
+      debug:
+        msg: 
+        - "Login Gitlab: {{ response_login_gitlab }}"
+    
+    - name: Docker down REMITTANCE stack remotely
+      shell: docker-compose -f docker-compose.yml down
+      args:
+        chdir: /usr/local/share/etc-parking/microservice_remittance
+      ignore_errors: yes
+    
+    - name: Docker up REMITTANCE stack remotely
+      shell: docker-compose -f docker-compose.yml up -d
+      args:
+        chdir: /usr/local/share/etc-parking/microservice_remittance
+      ignore_errors: yes
+    
+    - name: Remove Loggins Afters
+      shell: 'docker logout registry.gitlab.com'
+      register: logout_gitlab
+      ignore_errors: yes
