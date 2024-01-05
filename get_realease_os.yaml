@@ -1,0 +1,14 @@
+---
+- name: Get Release OS in hosts
+  hosts: all
+  gather_facts: yes
+  
+  tasks:
+  - name: Check system O.S information
+    shell:
+      "lsb_release -a"
+    register: os_info
+
+  - name: Print information
+    debug:
+      msg: "{{os_info.stdout_lines}}"
